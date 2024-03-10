@@ -3,10 +3,12 @@
 #include <cstdint>
 #include <map>
 #include <string>
+ #include <SoftwareSerial.h>
 
 #include "EncButton.h"
 #include "GyverShift.h"
 
+#include "mdb.h"
 
 //Кнопки
 #define BTN1 D1  //5    U
@@ -15,14 +17,16 @@
 #define BTN4 D4  //2    W
 
 //Дисплей
-#define DAT D0  //DATA  / DS
-#define CLK D5  //CLOCK / SHCP
-#define CS  D6  //Latch / STCP
+#define DAT D6  //DATA  / DS   D0
+#define CLK D7  //CLOCK / SHCP D5
+#define CS  D8  //Latch / STCP D6
+
+
 
 using std::string;
 
 //Вывод на дисплей посимвольно
-void displayChars(string s1, string s2, string  s3);
+void display(string s1, string s2, string  s3);
 
 //Вывод на дисплей значения до 999
-void displayVal(uint16_t val);
+void display(uint16_t val);
