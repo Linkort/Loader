@@ -5,11 +5,10 @@ Button btnDown(BTN2);
 Button btnRead(BTN3);
 Button btnWrite(BTN4);
 
-uint8_t screenVal; //Адрес платы на экране
+uint8_t screenVal = 1; //Адрес платы на экране
 uint8_t mdbErrCode; //Код 
 
 void setup() {
-
   mdbSetup();
   display("allon", "allon", "allon");
   delay(500);
