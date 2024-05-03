@@ -5,11 +5,11 @@ SoftwareSerial S(RX, TX);
 
 //Стартовые настройки Modbus
 void mdbSetup() {
-    Serial.begin(BAUDS);
+   // Serial.begin(BAUDS);
     S.begin(115200);
    // Serial.swap();
     node.begin(SLAVE_ADDR, S);
-  //  node.begin(SLAVE_ADDR, Serial);
+   // node.begin(SLAVE_ADDR, Serial);
 }
 
 
