@@ -1,13 +1,13 @@
 #pragma once
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <FS.h>
+//#include <FS.h>
 #include <ESP8266FtpServer.h>
+
 
 #include <cstdint>
 #include <map>
 #include <string>
-
 
 #include <SoftwareSerial.h>
 
@@ -46,6 +46,3 @@ void display(uint16_t val);
 
 //Режим смены Modbus адреса платы
 void ChangeAddrMode();
-
-//Управление точкой доступа
-void APModeOnOff(bool ApEnable);

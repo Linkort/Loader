@@ -3,7 +3,7 @@
 ModbusMaster node;
 SoftwareSerial S(RX, TX);
 
-//Стартовые настройки Modbus
+
 void mdbSetup() {
    // Serial.begin(BAUDS);
     S.begin(115200);
@@ -13,7 +13,6 @@ void mdbSetup() {
 }
 
 
-//Опрос платы
 uint8_t mdbPoll(bool cmdRead, bool cmdWrite, uint8_t& Addr){
     static uint8_t state;
     uint8_t result;

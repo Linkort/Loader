@@ -16,7 +16,7 @@ std::map <string, uint8_t> symb = {
     {"alloff", 0b11111111}, {"allon", 0b00000000}
 };
 
-//Вывод на дисплей посимвольно
+
 void display(string s1, string s2, string  s3){
     disp.buffer[0] = symb[s1];
     disp.buffer[1] = symb[s2];
@@ -24,7 +24,7 @@ void display(string s1, string s2, string  s3){
     disp.update();
 }
 
-//Вывод на дисплей значения до 999
+
 void display(uint16_t val){
     disp.buffer[0] = symb[std::to_string((val / 100) % 10)];
     disp.buffer[1] = symb[std::to_string((val / 10) % 10)];

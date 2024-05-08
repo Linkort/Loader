@@ -6,27 +6,41 @@ Button btnRead(BTN3);
 Button btnWrite(BTN4);
 VirtButton btnChMode;
 
-uint8_t screenVal, mode; //Адрес платы на экране
+uint8_t screenVal;  //Адрес платы на экране. Значение 1-255;
+
+uint8_t mode; // Тек. режим работы. 
 
 FtpServer ftpSrv;
 
 void setup() {
-  mdbSetup();
-  display("allon", "allon", "allon");
   Serial.begin(BAUDS);
-
-  //Настройки точки доступа
-  //WiFi.softAP(AP_SSID, AP_PASS);
-
-  //Настройки FTP сервера
-  SPIFFS.begin();
-  ftpSrv.begin(AP_SSID, AP_PASS); 
-
+  /*
+  Режим точки доступа.
+  Вход - При подаче питания удерживать кнопку READ или WRITE
+  Выход - отключить питание
+  Назначение - hабота с файлами по FTP, работа с Loader'ом по Webс
+  */
+  if (btnRead.read() or btnWrite.read()) {
+    display("alloff", "A", "P"); 
+    WiFi.mode(WIFI_AP); 
+    WiFi.softAP(AP_SSID, AP_PASS);//Включение точки доступа
+    if (SPIFFS.begin()) ftpSrv.begin(AP_SSID, AP_PASS);//Настройки FTP сервера
+    mode = 11;
+    return;
+  }
+  //Настройки
+  display("allon", "allon", "allon");
+  mdbSetup();
   delay(500);
   display("-", "-", "-");
 }
 
 void loop() {
+  // Обработка запросов в режиме точки доступа
+  if (mode == 11) { 
+    ftpSrv.handleFTP(); // FTP запрос
+    return;
+  }
   //Обработка кнопок
   btnUp.tick();
   btnDown.tick();
@@ -34,23 +48,11 @@ void loop() {
   btnWrite.tick();
   btnChMode.tick(btnUp, btnDown); //Виртуальная кнопка для смены режима UP+DOWN
 
-  //Cмена режима при удержании кнопок UP и DOWN. Исполнение 1 раз.
+  //Cмена режима при удержании кнопок UP и DOWN. Исполнение 1 раз при смене.
   if (btnChMode.hold()){
-    mode = (mode+1) % 3;
-    switch (mode) 
-    {
-      case 0: //Режим смены адреса платы
-        display("A", "d", "r");
-        APModeOnOff(false);
-        break;
-      case 1: //Режим прошивки плат
-        display("F", "L", "S"); 
-        break;
-      case 2: //Режим точки доступа
-        display("alloff", "A", "P"); 
-        APModeOnOff(true);
-       break;
-    }
+    mode = (mode+1) % 2;
+    if (mode == 0) display("A", "d", "r"); //Режим смены адреса платы
+    if (mode == 0) display("F", "L", "S"); //Режим прошивки плат
   }
 
   switch (mode)
@@ -60,15 +62,12 @@ void loop() {
       break; 
     case 1: //Режим прошивки плат
       break;
-    case 2: //Режим точки доступа
-      ftpSrv.handleFTP(); //Ftp клиент
-      break;
   }
   
 }
 
 
-//Режим смены Modbus адреса платы
+
 void ChangeAddrMode() {
   uint8_t mdbErrCode; //Результат чтения/записи по Modbus
 
@@ -98,15 +97,4 @@ void ChangeAddrMode() {
     return;
   }
   display("E", "r", std::to_string(mdbErrCode % 10)); // Вывод кода ошибки
-}
-
-
-//Управление точкой доступа
-void APModeOnOff(bool ApEnable){
-  if (ApEnable) {
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP(AP_SSID, AP_PASS);//Включение точки доступа
-  } else{
-    WiFi.softAPdisconnect(true); //Отключение точки доступа
-  }
 }
