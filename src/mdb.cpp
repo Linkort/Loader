@@ -5,13 +5,15 @@ SoftwareSerial S(RX, TX);
 
 
 void mdbSetup() {
-   // Serial.begin(BAUDS);
+    /* 
+    Настройки для работы по ModbusRTU 
+    Выполнить раз при старте
+    */
     S.begin(115200);
    // Serial.swap();
     node.begin(SLAVE_ADDR, S);
    // node.begin(SLAVE_ADDR, Serial);
 }
-
 
 uint8_t mdbPoll(bool cmdRead, bool cmdWrite, uint8_t& Addr){
     static uint8_t state;

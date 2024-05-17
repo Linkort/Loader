@@ -6,28 +6,26 @@ Button btnRead(BTN3);
 Button btnWrite(BTN4);
 VirtButton btnChMode;
 
+
 uint8_t screenVal;  //Адрес платы на экране. Значение 1-255;
 
-uint8_t mode; // Тек. режим работы. 
+uint8_t mode; // Тек. режим работы.
 
-FtpServer ftpSrv;
+uint8_t firmVal; //Для отображения названий прошивок.
+
+std::vector <String> List;
 
 void setup() {
   Serial.begin(BAUDS);
-  /*
-  Режим точки доступа.
-  Вход - При подаче питания удерживать кнопку READ или WRITE
-  Выход - отключить питание
-  Назначение - hабота с файлами по FTP, работа с Loader'ом по Webс
-  */
+  ftpSetup(); 
   if (btnRead.read() or btnWrite.read()) {
-    display("alloff", "A", "P"); 
-    WiFi.mode(WIFI_AP); 
-    WiFi.softAP(AP_SSID, AP_PASS);//Включение точки доступа
-    if (SPIFFS.begin()) ftpSrv.begin(AP_SSID, AP_PASS);//Настройки FTP сервера
+    //Переход режим точки доступа
+    display(" ", "A", "P");
+    httpSetup();
     mode = 11;
     return;
   }
+
   //Настройки
   display("allon", "allon", "allon");
   mdbSetup();
@@ -36,11 +34,11 @@ void setup() {
 }
 
 void loop() {
-  // Обработка запросов в режиме точки доступа
-  if (mode == 11) { 
-    ftpSrv.handleFTP(); // FTP запрос
+  if (mode == 11) {// Режим точки доступа
+    AccessPointMode();
     return;
   }
+
   //Обработка кнопок
   btnUp.tick();
   btnDown.tick();
@@ -52,7 +50,10 @@ void loop() {
   if (btnChMode.hold()){
     mode = (mode+1) % 2;
     if (mode == 0) display("A", "d", "r"); //Режим смены адреса платы
-    if (mode == 0) display("F", "L", "S"); //Режим прошивки плат
+    if (mode == 1) {//Режим прошивки плат
+      display("F", "L", "S");
+      List = firmwareListUpdate();
+    }
   }
 
   switch (mode)
@@ -61,14 +62,60 @@ void loop() {
       ChangeAddrMode();
       break; 
     case 1: //Режим прошивки плат
+      FlashMode();
       break;
   }
   
 }
 
 
+void AccessPointMode(){
+  /*
+  Режим точки доступа.
+  Вход - При подаче питания удерживать кнопку READ или WRITE.
+  Выход - отключить питание.
+  Назначение - работа с файлами по FTP, работа с Loader'ом по Web странице.
+  */
+  httpClient();
+  ftpClient();
+}
+
+void FlashMode(){
+  /*
+  //Режим прошивки платы расширения.
+  Вход - Удерживать 2 сек кнопки UP и DOWN.
+  Выход - Удерживать 2 сек кнопки UP и DOWN.
+  Назначение - Прошивка микроконтроллера STM32, который установлен на платах расширения.
+  */
+
+  //Up Button press
+  if (btnUp.click() or btnUp.step()) {
+    firmVal++;
+    if (firmVal >= List.size()) firmVal = 0; // Защита от выхода за пределы 0-кол-во прошивок
+    display(List[firmVal]);
+  }
+
+  //Down Button press
+  if (btnDown.click() or btnDown.step()) {
+    firmVal--;
+    if (firmVal >= List.size()) firmVal = (List.size()-1); // Защита от выхода за пределы 0-кол-во прошивок
+    display(List[firmVal]);
+  }
+  //Write Button press
+  if (btnWrite.click()){
+    //Старт прошивки
+  }
+}
+
 
 void ChangeAddrMode() {
+  /*
+  //Режим смены Modbus адреса платы
+  Вход - Удерживать 2 сек кнопки UP и DOWN.
+  Выход - Удерживать 2 сек кнопки UP и DOWN.
+  Назначение - , который установлен на платах расширения.
+  */
+
   uint8_t mdbErrCode; //Результат чтения/записи по Modbus
 
   //Up Button press
@@ -96,5 +143,6 @@ void ChangeAddrMode() {
     display("S","u","c"); // Вывод сообщения
     return;
   }
-  display("E", "r", std::to_string(mdbErrCode % 10)); // Вывод кода ошибки
+  display("E", "r", String(mdbErrCode % 10)); // Вывод кода ошибки
 }
+
