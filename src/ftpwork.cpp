@@ -22,9 +22,9 @@ std::vector <String> firmwareListUpdate(){
     Dir dir = SPIFFS.openDir("/");
     while(dir.next()){//перебор файлов в директории
         tempstring = dir.fileName();
-        tempstring = tempstring.substring(1,30);
+        tempstring = tempstring.substring(1,30); //убрать / в названии файла
         if (not tempstring.endsWith(".bin")) continue;// поиск файлов "*.bin"
-        firmwareList.push_back(tempstring);
+        firmwareList.push_back(tempstring); // добавить в список
     }
     //отладка
     for (size_t i = 0; i < firmwareList.size(); i++)

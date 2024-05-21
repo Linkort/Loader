@@ -14,6 +14,7 @@
 #include "mdb.h"
 #include "httpwork.h"
 #include "ftpwork.h"
+#include "flash.h"
 
 //Кнопки
 #define BTN1 D4  //2    U

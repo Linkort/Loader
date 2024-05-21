@@ -6,21 +6,19 @@ Button btnRead(BTN3);
 Button btnWrite(BTN4);
 VirtButton btnChMode;
 
-
-uint8_t screenVal;  //Адрес платы на экране. Значение 1-255;
-
+uint8_t screenVal; //Адрес платы на экране. Значение 1-255;
 uint8_t mode; // Тек. режим работы.
-
-uint8_t firmVal; //Для отображения названий прошивок.
-
-std::vector <String> List;
+uint8_t firmVal; //Для отображения названий прошивок. Индекс прошивки в векторе.
+std::vector <String> List; //Список прошивок
 
 void setup() {
   Serial.begin(BAUDS);
+  Serial.printf("\n");
   ftpSetup(); 
   if (btnRead.read() or btnWrite.read()) {
     //Переход режим точки доступа
     display(" ", "A", "P");
+    Serial.println("Режим точки доступа");
     httpSetup();
     mode = 11;
     return;
@@ -49,9 +47,14 @@ void loop() {
   //Cмена режима при удержании кнопок UP и DOWN. Исполнение 1 раз при смене.
   if (btnChMode.hold()){
     mode = (mode+1) % 2;
-    if (mode == 0) display("A", "d", "r"); //Режим смены адреса платы
+    if (mode == 0) {//Режим смены адреса платы
+      display("A", "d", "r");
+      Serial.println("Режим смены адреса платы");
+    }
+    
     if (mode == 1) {//Режим прошивки плат
       display("F", "L", "S");
+      Serial.println("Режим прошивки плат");
       List = firmwareListUpdate();
     }
   }
@@ -88,6 +91,8 @@ void FlashMode(){
   Назначение - Прошивка микроконтроллера STM32, который установлен на платах расширения.
   */
 
+  uint8_t flashErrCode; //Результат прошивки
+
   //Up Button press
   if (btnUp.click() or btnUp.step()) {
     firmVal++;
@@ -103,7 +108,8 @@ void FlashMode(){
   }
   //Write Button press
   if (btnWrite.click()){
-    //Старт прошивки
+    flashErrCode = Flash(List[firmVal]);
+    
   }
 }
 
@@ -134,7 +140,8 @@ void ChangeAddrMode() {
 
   //Работа с Modbus устройством
   mdbErrCode = mdbPoll(btnRead.click(), btnWrite.click(), screenVal); 
-  if (mdbErrCode == 255) return; //Не было команды  
+  if (mdbErrCode == 255) return; //Не было команды
+  Serial.printf("Резульат запроса: %u", mdbErrCode);  
   if (mdbErrCode == 108) { //Успешное чтение
     display(screenVal); // Вывод адреса платы
     return;
