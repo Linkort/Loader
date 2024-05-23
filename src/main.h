@@ -28,10 +28,12 @@
 #define CS  D8  //Latch / STCP D6
 
 //WiFi точка доступа
-
 #define AP_SSID "LoaderAP" // Название WiFi точки | UserName для FTP
 #define AP_PASS "11111111" // Пароль   WiFi точки | Password для FTP
 
+//Порт подключения платы расширения
+#define RX D5
+#define TX D0
 
 
 //Вывод на дисплей посимвольно

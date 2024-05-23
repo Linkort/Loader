@@ -3,28 +3,38 @@
 
 File UploadFile; //Файл прошивки
 
-SoftwareSerial Sport(RX, TX);
+SoftwareSerial Sport;
 
-uint8_t Flash(String fileName){
+void flashSetup(SoftwareSerial &p){
+    //Переоткрыть порт с новыми параметрами
+   // *port = &p;
+    p.end();
+    p.begin(BAUDS, SWSERIAL_8E1);
+}
+
+uint8_t flash(String fileName){
+
     String path = "/" + fileName;
-    //Dir dir = SPIFFS.openDir("/");
-    //UploadFile = dir.openFile
     if (!SPIFFS.exists(path)) return 1; //Файл не найден.
     UploadFile = SPIFFS.open(path, "r");//Открыть файл на чтение.
     if (!UploadFile) return 2; //Ошибка при открытии.
 
-    if (!stm32Connect())
     //инициализация
+    if (!stm32Connect()) return 0; //Нет ответа от STM
     
-
     UploadFile.close(); //Закрыть файл.
-    return 0;
+
+    return 255;
+}
+
+void sentCmd(byte cmd){
+    //Для каждой команды хост отправляет байт и его байт-инверсия
+   // Sport.write(cmd);
+   // Sport.write(~cmd);
 }
 
 void sentByte(byte cmd){
-    //Для каждой команды хост отправляет байт и его байт-инверсия
-    Sport.write(cmd);
-    Sport.write(~cmd);
+   // Sport.write(cmd);
 }
 
 bool check(byte b){

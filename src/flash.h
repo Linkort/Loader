@@ -10,8 +10,9 @@
 #define stm32READ       0x11 //Байт чтения
 #define stm32WRITE      0x31 //Байт чтения
 #define stm32ERASE      0x43 //Байт очистки
-#define stm32EXERASE    0x44 //Байт очистки
+#define stm32EXTERASE   0x44 //Байт очистки
 
+//Команды stm32ERASE и stm32EXTERASE - взаимоисключающие
 
 
 
@@ -20,7 +21,9 @@
 
 
 //Загрузка прошивки
-uint8_t Flash(String fileName);
+void flashSetup(SoftwareSerial &port);
+
+uint8_t flash(String fileName);
 
 //Отправить команду
 void sentByte(byte cmd);

@@ -11,6 +11,8 @@ uint8_t mode; // Тек. режим работы.
 uint8_t firmVal; //Для отображения названий прошивок. Индекс прошивки в векторе.
 std::vector <String> List; //Список прошивок
 
+SoftwareSerial Ch(RX, TX); //порт подключения плат расширения
+
 void setup() {
   Serial.begin(BAUDS);
   Serial.printf("\n");
@@ -26,7 +28,8 @@ void setup() {
 
   //Настройки
   display("allon", "allon", "allon");
-  mdbSetup();
+  Ch.begin(BAUDS, SWSERIAL_8N1);
+  mdbSetup(Ch);
   delay(500);
   display("-", "-", "-");
 }
@@ -49,12 +52,14 @@ void loop() {
     mode = (mode+1) % 2;
     if (mode == 0) {//Режим смены адреса платы
       display("A", "d", "r");
+      mdbSetup(Ch);
       Serial.println("Режим смены адреса платы");
     }
     
     if (mode == 1) {//Режим прошивки плат
       display("F", "L", "S");
       Serial.println("Режим прошивки плат");
+      flashSetup(Ch);
       List = firmwareListUpdate();
     }
   }
@@ -108,8 +113,7 @@ void FlashMode(){
   }
   //Write Button press
   if (btnWrite.click()){
-    flashErrCode = Flash(List[firmVal]);
-    
+    flashErrCode = flash(List[firmVal]);
   }
 }
 

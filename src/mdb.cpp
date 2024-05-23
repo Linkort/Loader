@@ -1,18 +1,15 @@
 #include "mdb.h"
 
 ModbusMaster node;
-SoftwareSerial S(RX, TX);
 
-
-void mdbSetup() {
+void mdbSetup(SoftwareSerial &port) {
     /* 
-    Настройки для работы по ModbusRTU 
-    Выполнить раз при старте
+    Настройки для работы по ModbusRTU
     */
-    S.begin(115200);
-   // Serial.swap();
-    node.begin(SLAVE_ADDR, S);
-   // node.begin(SLAVE_ADDR, Serial);
+    //Переоткрыть порт с новыми параметрами
+    port.end(); 
+    port.begin(BAUDS, SWSERIAL_8N1);
+    node.begin(SLAVE_ADDR, port);
 }
 
 uint8_t mdbPoll(bool cmdRead, bool cmdWrite, uint8_t& Addr){
