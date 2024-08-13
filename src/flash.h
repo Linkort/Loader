@@ -23,19 +23,16 @@
 //Загрузка прошивки
 void flashSetup(SoftwareSerial &port);
 
-uint8_t flash(String fileName);
-
-//Отправить команду
-void sentByte(byte cmd);
-
-//Проверка на байт подтверждения
-bool check(byte b);
-
-//Таймаут ожидания ответа
-bool timeout();
+uint8_t flash(bool cmd, String fileName);
 
 //Подключение к STM32
-bool stm32Connect();
+bool stm32Connect(uint8_t& err);
+
+//Проверка на байт подтверждения
+bool checkAct(uint8_t errtype, uint8_t& err);
+
+//Отправить команду
+void sentCmd(byte cmd);
 
 //Чтение памяти (Команда 0x11 - GET)
 bool stm32Read();

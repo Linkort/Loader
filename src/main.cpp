@@ -58,9 +58,9 @@ void loop() {
     
     if (mode == 1) {//Режим прошивки плат
       display("F", "L", "S");
-      Serial.println("Режим прошивки плат");
       flashSetup(Ch);
-      List = firmwareListUpdate();
+      Serial.println("Режим прошивки плат");
+      List = firmwareListUpdate();  
     }
   }
 
@@ -112,9 +112,15 @@ void FlashMode(){
     display(List[firmVal]);
   }
   //Write Button press
-  if (btnWrite.click()){
-    flashErrCode = flash(List[firmVal]);
+  flashErrCode = flash(btnWrite.click(), List[firmVal]);
+  if (flashErrCode == 255) return;
+  Serial.printf("Резульат прошивки: %u\n", flashErrCode);  
+  if (flashErrCode > 100) {
+    Serial.printf("Успешно : %u", flashErrCode);  
+    display("S","u","c"); // Вывод сообщения
+    return;
   }
+  display("E", "r", String(flashErrCode / 10)); // Вывод кода ошибки
 }
 
 
@@ -145,7 +151,7 @@ void ChangeAddrMode() {
   //Работа с Modbus устройством
   mdbErrCode = mdbPoll(btnRead.click(), btnWrite.click(), screenVal); 
   if (mdbErrCode == 255) return; //Не было команды
-  Serial.printf("Резульат запроса: %u", mdbErrCode);  
+  Serial.printf("Резульат запроса: %u\n", mdbErrCode);  
   if (mdbErrCode == 108) { //Успешное чтение
     display(screenVal); // Вывод адреса платы
     return;
