@@ -111,11 +111,16 @@ void FlashMode(){
     if (firmVal >= List.size()) firmVal = (List.size()-1); // Защита от выхода за пределы 0-кол-во прошивок
     display(List[firmVal]);
   }
+
+  if (btnRead.click()){
+    Serial.print(Ch.read());
+  }
+
   //Write Button press
   flashErrCode = flash(btnWrite.click(), List[firmVal]);
   if (flashErrCode == 255) return;
   Serial.printf("Резульат прошивки: %u\n", flashErrCode);  
-  if (flashErrCode > 100) {
+  if (flashErrCode == 200) {
     Serial.printf("Успешно : %u", flashErrCode);  
     display("S","u","c"); // Вывод сообщения
     return;

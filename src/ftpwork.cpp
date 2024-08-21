@@ -27,10 +27,11 @@ std::vector <String> firmwareListUpdate(){
         firmwareList.push_back(tempstring); // добавить в список
     } 
     //Вывод списка доступных прошивок. Отладка
+    Serial.print("Firmware list: ");
     for (size_t i = 0; i < firmwareList.size(); i++)
     {
         Serial.print(firmwareList[i]+ " ");
     }
-
+    Serial.println();
     return firmwareList;
 }

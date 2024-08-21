@@ -23,6 +23,7 @@
 //Загрузка прошивки
 void flashSetup(SoftwareSerial &port);
 
+//main фукция
 uint8_t flash(bool cmd, String fileName);
 
 //Подключение к STM32
@@ -32,18 +33,25 @@ bool stm32Connect(uint8_t& err);
 bool checkAct(uint8_t errtype, uint8_t& err);
 
 //Отправить команду
-void sentCmd(byte cmd);
+void sendCmd(byte cmd);
+
+//Отправка адреса в области памяти
+bool stm32SendMemoryAddr();
+
+//Отправка данных прошивки
+bool stm32SendData();
+
 
 //Чтение памяти (Команда 0x11 - GET)
 bool stm32Read();
 
 //Запись в память (Команда 0x31 - WriteMemory)
-bool stm32Write();
+bool stm32Write(File& firmware, uint8_t& err);
 
 //Очистка Памяти (Команда 0x43 - Erase)
 bool stm32Erase();
 
 //Очистка Памяти (Команда 0x44 - Extended Erase)
-bool stm32ExErase();
+bool stm32ExErase(uint8_t& err);
 
 
