@@ -121,7 +121,6 @@ void FlashMode(){
   if (flashErrCode == 255) return;
   Serial.printf("Резульат прошивки: %u\n", flashErrCode);  
   if (flashErrCode == 200) {
-    Serial.printf("Успешно : %u", flashErrCode);  
     display("S","u","c"); // Вывод сообщения
     return;
   }

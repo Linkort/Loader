@@ -1,16 +1,16 @@
 #pragma once
 #include "main.h"
 
-#define stm32offset 0x8000000 //Область памяти Flash
+#define FlashAddrOffset 0x8000000 //Область памяти для загрузки прошивки
 
 //Байт/Команда
-#define stm32ACT        0x79 //Байт подтверждения
-#define stm32NACT       0x1F //Байт отказа
-#define stm32INIT       0x7F //Байт инициализации
-#define stm32READ       0x11 //Байт чтения
-#define stm32WRITE      0x31 //Байт чтения
-#define stm32ERASE      0x43 //Байт очистки
-#define stm32EXTERASE   0x44 //Байт очистки
+#define STM32ACT        0x79 //Байт подтверждения
+#define STM32NACT       0x1F //Байт отказа
+#define STM32INIT       0x7F //Байт инициализации
+#define STM32READ       0x11 //Байт чтения
+#define STM32WRITE      0x31 //Байт чтения
+#define STM32ERASE      0x43 //Байт очистки
+#define STM32EXTERASE   0x44 //Байт очистки
 
 //Команды stm32ERASE и stm32EXTERASE - взаимоисключающие
 
@@ -35,12 +35,8 @@ bool checkAct(uint8_t errtype, uint8_t& err);
 //Отправить команду
 void sendCmd(byte cmd);
 
-//Отправка адреса в области памяти
-bool stm32SendMemoryAddr();
-
-//Отправка данных прошивки
-bool stm32SendData();
-
+//рассчет CRC
+uint8_t CRC(const uint8_t (&buf)[], size_t bytenum);
 
 //Чтение памяти (Команда 0x11 - GET)
 bool stm32Read();
