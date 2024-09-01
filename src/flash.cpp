@@ -9,7 +9,7 @@ void flashSetup(SoftwareSerial &p){
     Sport = &p;
     //Переоткрыть порт с новыми параметрами
     (*Sport).end();
-    (*Sport).begin(BAUDS, SWSERIAL_8E1);
+    (*Sport).begin(FlashBauds, SWSERIAL_8E1);
 }
 
 uint8_t flash(bool cmd, String fileName){
@@ -25,6 +25,7 @@ uint8_t flash(bool cmd, String fileName){
     if (!SPIFFS.exists(path)) return 11; //Файл не найден.
     UploadFile = SPIFFS.open(path, "r");//Открыть файл на чтение.
     if (!UploadFile) return 12; //Ошибка при открытии файла.
+    if (UploadFile.size() == 0) return 13; //Защита от пустого файла
     Serial.println("Firmware -OK-");
     
     if (!stm32ExErase(result)) return result; //Очистка памяти
@@ -39,6 +40,7 @@ uint8_t flash(bool cmd, String fileName){
         255 - Нет команды на прошивку.
         11 - Файл не найден.
         12 - Ошибка при открытии файла.
+        13 - Файл прошивки пуст.
 
         21 - Подключение. Нет ответа от платы.
         22 - Подключение. STM32 вернул NACT ответ при попытке подключения. 
@@ -51,7 +53,6 @@ uint8_t flash(bool cmd, String fileName){
         36 - Очистка памяти. STM32 вернул NACT ответ по завершению очистки. Ошибка.
         37 - Очистка памяти. STM32 вернул не ожидаемый фрейм по завершению очистки.
 
-        40 - Запись Прошивки. Файл прошивки пуст.
         41 - Запись Прошивки. Нет ответа от платы после отправки команды.
         42 - Запись Прошивки. STM32 вернул NACT ответ после отправки команды. Команда не поддерживается
         43 - Запись Прошивки. STM32 вернул не ожидаемый фрейм после отправки команды.
@@ -113,24 +114,13 @@ uint8_t CRC(const uint8_t (&buf)[], size_t cnt){
     return crc;
 }
 
-bool stm32Read(){
-    
-    return false;
-}
-
 bool stm32Write(File& firmware, uint8_t& err){
     uint32_t addr;
     size_t fsize = firmware.size(); //Размер файла
     uint16_t packlen;
-    uint8_t buf[256];
-
-    if (fsize == 0){ //Защита от пустого файла
-        err = 40;
-        return false;
-    }
+    uint8_t buf[256], crc;
     
     Serial.printf("Firmware size: %u bytes.\n", fsize);
-   // Serial.println(firmware);
     for (uint i = 0; i < fsize;)
     {
         //Запись идет пакетами по 256 байт, последний по остатку.
@@ -150,10 +140,11 @@ bool stm32Write(File& firmware, uint8_t& err){
         (*Sport).write(buf, 5);
         if (!checkAct(43, err)) return false; //ожид. подтверждения
         //данные
-        (*Sport).write(packlen-1);
         firmware.read(buf, packlen);
+        crc = CRC(buf, packlen) ^ (packlen-1);
+        (*Sport).write(packlen-1);
         (*Sport).write(buf, packlen);
-        (*Sport).write(CRC(buf, packlen) ^ (packlen-1));
+        (*Sport).write(crc);
         if (!checkAct(46, err)) return false; //ожид. подтверждения
     }
     

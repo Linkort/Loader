@@ -20,8 +20,8 @@ uint8_t mdbPoll(bool cmdRead, bool cmdWrite, uint8_t& Addr){
     switch (state) {
         case 0:  return 255; //Нет команды для опроса
         case 1: //Чтение
-            result = node.readHoldingRegisters(REG_OFFSET, 1);
             state = 0; //Сброс для выполнения только 1 запроса.
+            result = node.readHoldingRegisters(REG_OFFSET, 1);
             //Успешно
             if (result == node.ku8MBSuccess) {
                 Addr = node.getResponseBuffer(0); // Прочитанный адрес устройства.
@@ -30,13 +30,14 @@ uint8_t mdbPoll(bool cmdRead, bool cmdWrite, uint8_t& Addr){
 
             break;
         case 2: //Запись
-            node.setTransmitBuffer(0,Addr); //Новый адрес платы
-            node.setTransmitBuffer(1,BAUDS_DIV); //Новый делитель скорости платы
-            result = node.writeMultipleRegisters(REG_OFFSET, 2);
             state = 0; //Сброс для выполнения только 1 запроса.
+            result = node.writeSingleRegister(REG_OFFSET, Addr); //Новый адрес платы
+            if (!result == node.ku8MBSuccess) break; //Выход при ошибке
+            result = node.writeSingleRegister(REG_OFFSET+1, BAUDS_DIV); //Новый делитель скорости платы
             if (result == node.ku8MBSuccess) {
                 return 109; //Успешный запрос
             }
+            break;
     } 
     //Ошибка по таймауту. Нет ответа от устройства
     if (result == node.ku8MBResponseTimedOut) return 0;     //Таймаут. Нет ответа от устройства

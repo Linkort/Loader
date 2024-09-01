@@ -14,7 +14,7 @@
 
 //Команды stm32ERASE и stm32EXTERASE - взаимоисключающие
 
-
+#define FlashBauds      128000//Скорость прошивки.
 
 //AN3155 - протокол загрузчика USART STM32
 //https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf
@@ -37,9 +37,6 @@ void sendCmd(byte cmd);
 
 //рассчет CRC
 uint8_t CRC(const uint8_t (&buf)[], size_t bytenum);
-
-//Чтение памяти (Команда 0x11 - GET)
-bool stm32Read();
 
 //Запись в память (Команда 0x31 - WriteMemory)
 bool stm32Write(File& firmware, uint8_t& err);
